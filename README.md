@@ -1,6 +1,5 @@
-# Kelompok 6 - Alevale Mahakarya E-Commerce App
-
-Aplikasi mobile e-commerce produk kerajinan tangan yang memungkinkan pengguna untuk mencari produk, melakukan pemesanan, dan melacak pengiriman dengan pengalaman pengguna yang mulus.
+# Kelompok 9 - Resep makanan Syaben
+Aplikasi resep makanan yang dirancang untuk membantu pengguna menemukan,mempelajari, dan mengelola resep masakan secara mudah dan interaktif.
 
 *Tugas Besar:* Dasar Pemrograman Perangkat Bergerak (DPPB)  
 *Universitas:* Telkom University  
@@ -12,16 +11,15 @@ Aplikasi mobile e-commerce produk kerajinan tangan yang memungkinkan pengguna un
 
 | Nama | NIM | Role / Fitur Tanggung Jawab |
 |------|-----|-----------------------------|
-| *Ludfiana Putri Damirahadi* | 607012400091 | Login, Katalog Produk, Detail Produk, Wishlist |
-| *Hanna Tri Yuniawati* | 607012400074 | Profile, Tambah ke Keranjang, Kelola Keranjang, Checkout |
-| *Sannatthariq Annizemi Achmed Deedat* | 607012400087 | Forgot Password, Pembayaran, Lihat Status Pesanan, Lacak Pengiriman |
-| *Abdul Fikri Husaini* | 607012400104 | Register, Lihat Riwayat Pesanan, Review Produk, Hubungi Admin/CS |
+| *Revan Syaikal Labib* | 607012400009 | Rekomendasi Resep, Video Tutorial, Planner, Kelola Planner |
+| *Benrydes Manulang* | 607012400021| Pencarian Resep, Hasil Pencarian, Detail Resep, Kelola Resep |
+| *Syahrul Mubarrok* | 607012400037 | Login, Registrasi, Home, Kelola User/Autentikasi |
 
 ---
 
 ## Features Overview
 
-### 1. Ludfiana Putri Damirahadi (607012400091)
+### 1. Revan Syaikal Labib (607012400009)
 *Scope: Product Discovery & Authentication*
 - *Login:* Otentikasi user menggunakan API Reqres.in (POST) dengan validasi alert dialog.
 - *Katalog Produk:* Menampilkan list produk dari FakeStoreAPI (GET) dengan GridView, Search Bar, dan Filter Kategori (ListView).
