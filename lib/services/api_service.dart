@@ -2,10 +2,23 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/recipe_model.dart';
 import '../models/planner_model.dart';
+import '../models/user_model.dart';
 
 class ApiService {
   // Comment dulu URL API yang belum ada
   // static const String baseUrl = 'https://your-api-url.com/api';
+  
+  // In-memory storage untuk development (akan diganti dengan database nanti)
+  static final List<Map<String, dynamic>> _registeredUsers = [
+    {
+      'id': '1',
+      'name': 'Test User',
+      'email': 'test@example.com',
+      'password': 'password', // Dalam production, password harus di-hash!
+      'avatarUrl': 'https://via.placeholder.com/100x100',
+      'createdAt': DateTime.now().subtract(const Duration(days: 30)),
+    }
+  ];
   
   // GET - List resep (untuk rekomendasi)
   static Future<List<Recipe>> getRecipes() async {
@@ -92,6 +105,174 @@ class ApiService {
     } catch (e) {
       print('API Error: $e');
       return true; // Return true agar app tetap jalan
+    }
+  }
+  
+  // POST - Login user
+  static Future<AuthResponse> login(String email, String password) async {
+    try {
+      // Untuk development, cek dari list user yang sudah register
+      final userData = _registeredUsers.firstWhere(
+        (user) => user['email'] == email && user['password'] == password,
+        orElse: () => {},
+      );
+      
+      if (userData.isNotEmpty) {
+        return AuthResponse(
+          success: true,
+          message: 'Login berhasil',
+          user: User(
+            id: userData['id'],
+            name: userData['name'],
+            email: userData['email'],
+            avatarUrl: userData['avatarUrl'],
+            createdAt: userData['createdAt'],
+          ),
+          token: 'dummy_token_${userData['id']}',
+        );
+      } else {
+        return AuthResponse(
+          success: false,
+          message: 'Email atau password salah',
+        );
+      }
+      
+      /* Comment dulu HTTP request
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(LoginRequest(email: email, password: password).toJson()),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return AuthResponse.fromJson(data);
+      } else {
+        return AuthResponse(
+          success: false,
+          message: 'Login gagal: ${response.statusCode}',
+        );
+      }
+      */
+    } catch (e) {
+      print('Login API Error: $e');
+      return AuthResponse(
+        success: false,
+        message: 'Terjadi kesalahan: $e',
+      );
+    }
+  }
+  
+  // POST - Register user
+  static Future<AuthResponse> register(String name, String email, String password) async {
+    try {
+      // Untuk development, cek apakah email sudah terdaftar
+      final existingUser = _registeredUsers.firstWhere(
+        (user) => user['email'] == email,
+        orElse: () => {},
+      );
+      
+      if (existingUser.isNotEmpty) {
+        return AuthResponse(
+          success: false,
+          message: 'Email sudah terdaftar',
+        );
+      }
+      
+      // Buat user baru
+      final newUser = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'name': name,
+        'email': email,
+        'password': password, // Dalam production, password harus di-hash!
+        'avatarUrl': 'https://via.placeholder.com/100x100',
+        'createdAt': DateTime.now(),
+      };
+      
+      // Simpan ke list
+      _registeredUsers.add(newUser);
+      
+      return AuthResponse(
+        success: true,
+        message: 'Registrasi berhasil',
+        user: User(
+          id: newUser['id'] as String,
+          name: newUser['name'] as String,
+          email: newUser['email'] as String,
+          avatarUrl: newUser['avatarUrl'] as String?,
+          createdAt: newUser['createdAt'] as DateTime,
+        ),
+        token: 'dummy_token_${newUser['id']}',
+      );
+      
+      /* Comment dulu HTTP request
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(RegisterRequest(name: name, email: email, password: password).toJson()),
+      );
+      
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return AuthResponse.fromJson(data);
+      } else {
+        return AuthResponse(
+          success: false,
+          message: 'Registrasi gagal: ${response.statusCode}',
+        );
+      }
+      */
+    } catch (e) {
+      print('Register API Error: $e');
+      return AuthResponse(
+        success: false,
+        message: 'Terjadi kesalahan: $e',
+      );
+    }
+  }
+  
+  // GET - Get current user profile
+  static Future<User?> getCurrentUser() async {
+    try {
+      // Untuk development, ambil user dari token yang tersimpan
+      final token = getToken();
+      if (token != null && token.startsWith('dummy_token_')) {
+        final userId = token.replaceFirst('dummy_token_', '');
+        final userData = _registeredUsers.firstWhere(
+          (user) => user['id'] == userId,
+          orElse: () => _registeredUsers.first, // Fallback ke user pertama
+        );
+        
+        return User(
+          id: userData['id'] as String,
+          name: userData['name'] as String,
+          email: userData['email'] as String,
+          avatarUrl: userData['avatarUrl'] as String?,
+          createdAt: userData['createdAt'] as DateTime,
+        );
+      }
+      
+      return null;
+      
+      /* Comment dulu HTTP request
+      final response = await http.get(
+        Uri.parse('$baseUrl/auth/profile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${getToken()}', // Assuming you have token storage
+        },
+      );
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return User.fromJson(data);
+      } else {
+        return null;
+      }
+      */
+    } catch (e) {
+      print('Get User API Error: $e');
+      return null;
     }
   }
   
@@ -290,5 +471,27 @@ class ApiService {
         category: 'Dessert',
       ),
     ];
+  }
+  
+  // Helper method untuk mendapatkan token (untuk development, return dummy token)
+  static String? getToken() {
+    // Dalam implementasi nyata, token akan disimpan di secure storage
+    // Untuk development, return dummy token
+    return 'dummy_token_12345';
+  }
+  
+  // Helper method untuk menyimpan token
+  static void saveToken(String token) {
+    // Dalam implementasi nyata, simpan ke secure storage
+    print('Token saved: $token');
+  }
+  
+  // Helper method untuk debugging - lihat semua user terdaftar
+  static void debugPrintRegisteredUsers() {
+    print('=== REGISTERED USERS ===');
+    for (var user in _registeredUsers) {
+      print('ID: ${user['id']}, Name: ${user['name']}, Email: ${user['email']}');
+    }
+    print('========================');
   }
 }

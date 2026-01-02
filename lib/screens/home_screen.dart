@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Cari resep (nama, bahan, kategori)',
+                hintText: 'Cari resep',
                 prefixIcon: const Icon(Icons.search, color: Colors.orange),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear, color: Colors.grey),
@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
-                          childAspectRatio: 0.8,
+                          childAspectRatio: 0.75,
                         ),
                         itemCount: _recipes.length,
                         itemBuilder: (context, index) {
